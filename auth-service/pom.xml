@@ -86,6 +86,11 @@
             <version>0.12.7</version>
             <scope>runtime</scope>
         </dependency>
+        <!-- JavaMailSender for OTP / password-changed emails -->
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-mail</artifactId>
+</dependency>
 
         <!-- Swagger -->
         <dependency>
