@@ -2,15 +2,12 @@ package com.ibm.ems.attendance.dto;
 
 import jakarta.validation.constraints.NotBlank;
 
-public class AttendanceRequest {
+public class CheckOutRequest {
 
     @NotBlank(message = "Employee ID is required")
     private String employeeId;
 
-    @NotBlank(message = "Status is required")
-    private String status;
-
-    public AttendanceRequest() {
+    public CheckOutRequest() {
     }
 
     public String getEmployeeId() {
@@ -19,13 +16,5 @@ public class AttendanceRequest {
 
     public void setEmployeeId(String employeeId) {
         this.employeeId = employeeId;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
     }
 }

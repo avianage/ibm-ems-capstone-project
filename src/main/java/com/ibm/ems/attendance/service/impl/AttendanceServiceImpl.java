@@ -2,13 +2,26 @@ package com.ibm.ems.attendance.service.impl;
 
 import org.springframework.stereotype.Service;
 
+import com.ibm.ems.attendance.dto.AttendanceHistoryResponse;
 import com.ibm.ems.attendance.dto.AttendanceRequest;
 import com.ibm.ems.attendance.dto.AttendanceResponse;
+import com.ibm.ems.attendance.dto.CheckInRequest;
+import com.ibm.ems.attendance.dto.CheckOutRequest;
+import com.ibm.ems.attendance.dto.MonthlyReportResponse;
 import com.ibm.ems.attendance.entity.Attendance;
 import com.ibm.ems.attendance.repository.AttendanceRepository;
 import com.ibm.ems.attendance.service.AttendanceService;
+
+import java.util.stream.Collectors;
+
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+
+
 
 @Service
 public class AttendanceServiceImpl implements AttendanceService {
@@ -107,4 +120,136 @@ public class AttendanceServiceImpl implements AttendanceService {
 
         attendanceRepository.delete(attendance);
     }
+    
+    @Override
+    public AttendanceResponse checkIn(CheckInRequest request) {
+
+        LocalDate today = LocalDate.now();
+
+        Optional<Attendance> existingAttendance =
+                attendanceRepository.findByEmployeeIdAndDate(
+                        request.getEmployeeId(),
+                        today);
+
+        if (existingAttendance.isPresent()) {
+            throw new RuntimeException("Employee already checked in today.");
+        }
+
+        Attendance attendance = new Attendance();
+
+        attendance.setEmployeeId(request.getEmployeeId());
+        attendance.setDate(today);
+        attendance.setCheckIn(LocalTime.now());
+        attendance.setStatus("PRESENT");
+
+        Attendance savedAttendance = attendanceRepository.save(attendance);
+
+        AttendanceResponse response = new AttendanceResponse();
+
+        response.setId(savedAttendance.getId());
+        response.setEmployeeId(savedAttendance.getEmployeeId());
+        response.setStatus(savedAttendance.getStatus());
+
+        return response;
+    }
+    
+    @Override
+    public AttendanceResponse checkOut(CheckOutRequest request) {
+
+        LocalDate today = LocalDate.now();
+
+        Attendance attendance = attendanceRepository
+                .findByEmployeeIdAndDate(request.getEmployeeId(), today)
+                .orElseThrow(() -> new RuntimeException("Please check-in first before check-out"));
+
+        // set checkout time
+        LocalTime checkOutTime = LocalTime.now();
+        attendance.setCheckOut(checkOutTime);
+
+        // calculate working hours
+        LocalTime checkInTime = attendance.getCheckIn();
+
+        if (checkInTime != null) {
+            Duration duration = Duration.between(checkInTime, checkOutTime);
+            double hours = duration.toMinutes() / 60.0;
+            attendance.setWorkingHours(hours);
+        }
+
+        attendance.setStatus("PRESENT");
+
+        Attendance updated = attendanceRepository.save(attendance);
+
+        AttendanceResponse response = new AttendanceResponse();
+        response.setId(updated.getId());
+        response.setEmployeeId(updated.getEmployeeId());
+        response.setStatus(updated.getStatus());
+
+        return response;
+    }
+    
+    @Override
+    public List<AttendanceHistoryResponse> getAttendanceHistory(String employeeId) {
+
+        List<Attendance> attendanceList =
+                attendanceRepository.findByEmployeeIdOrderByDateDesc(employeeId);
+
+        return attendanceList.stream().map(attendance -> {
+
+            AttendanceHistoryResponse response = new AttendanceHistoryResponse();
+
+            response.setDate(attendance.getDate());
+            response.setCheckIn(attendance.getCheckIn());
+            response.setCheckOut(attendance.getCheckOut());
+            response.setWorkingHours(attendance.getWorkingHours());
+            response.setStatus(attendance.getStatus());
+
+            return response;
+
+        }).collect(Collectors.toList());
+    }
+    
+    @Override
+    public MonthlyReportResponse getMonthlyReport(String employeeId, int month, int year) {
+
+        List<Attendance> records =
+                attendanceRepository.findByEmployeeIdOrderByDateDesc(employeeId);
+
+        // Filter by month/year
+        List<Attendance> monthlyRecords = records.stream()
+                .filter(a -> a.getDate() != null
+                        && a.getDate().getMonthValue() == month
+                        && a.getDate().getYear() == year)
+                .toList();
+
+        long presentDays = monthlyRecords.stream()
+                .filter(a -> "PRESENT".equalsIgnoreCase(a.getStatus()))
+                .count();
+
+        double totalHours = monthlyRecords.stream()
+                .filter(a -> a.getWorkingHours() != null)
+                .mapToDouble(Attendance::getWorkingHours)
+                .sum();
+
+        long workingDays = 30; // simplified assumption
+
+        double expectedHours = workingDays * 8;
+
+        double overtime = Math.max(0, totalHours - expectedHours);
+
+        MonthlyReportResponse response = new MonthlyReportResponse();
+        response.setEmployeeId(employeeId);
+        response.setMonth(month);
+        response.setYear(year);
+
+        response.setTotalWorkingDays(workingDays);
+        response.setPresentDays(presentDays);
+        response.setAbsentDays(workingDays - presentDays);
+
+        response.setTotalWorkingHours(totalHours);
+        response.setOvertimeHours(overtime);
+
+        return response;
+    }
+    
+    
 }

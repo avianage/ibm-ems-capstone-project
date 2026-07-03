@@ -1,11 +1,18 @@
 package com.ibm.ems.attendance.controller;
 
+import com.ibm.ems.attendance.dto.AttendanceHistoryResponse;
 import com.ibm.ems.attendance.dto.AttendanceRequest;
 import com.ibm.ems.attendance.dto.AttendanceResponse;
+import com.ibm.ems.attendance.dto.CheckInRequest;
+import com.ibm.ems.attendance.dto.CheckOutRequest;
+import com.ibm.ems.attendance.dto.MonthlyReportResponse;
 import com.ibm.ems.attendance.service.AttendanceService;
 import java.util.List;
 
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
+
+
 
 @RestController
 @RequestMapping("/attendance")
@@ -26,7 +33,7 @@ public class AttendanceController {
     // Create Attendance API
     @PostMapping
     public AttendanceResponse createAttendance(
-            @RequestBody AttendanceRequest request) {
+            @Valid @RequestBody AttendanceRequest request) {
 
         return attendanceService.createAttendance(request);
     }
@@ -45,7 +52,7 @@ public class AttendanceController {
     @PutMapping("/{id}")
     public AttendanceResponse updateAttendance(
             @PathVariable String id,
-            @RequestBody AttendanceRequest request) {
+            @Valid @RequestBody AttendanceRequest request) {
 
         return attendanceService.updateAttendance(id, request);
     }
@@ -55,6 +62,34 @@ public class AttendanceController {
         attendanceService.deleteAttendance(id);
 
         return "Attendance deleted successfully.";
+    }
+    
+    @PostMapping("/checkin")
+    public AttendanceResponse checkIn(
+            @Valid @RequestBody CheckInRequest request) {
+
+        return attendanceService.checkIn(request);
+    }
+    
+    @PostMapping("/checkout")
+    public AttendanceResponse checkOut(
+            @Valid @RequestBody CheckOutRequest request) {
+
+        return attendanceService.checkOut(request);
+    }
+    
+    @GetMapping("/history/{employeeId}")
+    public List<AttendanceHistoryResponse> getHistory(@PathVariable String employeeId) {
+        return attendanceService.getAttendanceHistory(employeeId);
+    }
+    
+    @GetMapping("/monthly/{employeeId}")
+    public MonthlyReportResponse getMonthlyReport(
+            @PathVariable String employeeId,
+            @RequestParam int month,
+            @RequestParam int year) {
+
+        return attendanceService.getMonthlyReport(employeeId, month, year);
     }
     
 }
