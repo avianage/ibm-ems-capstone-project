@@ -18,6 +18,10 @@ public interface AttendanceRepository extends MongoRepository<Attendance, String
     
     List<Attendance> findByEmployeeIdOrderByDateDesc(String employeeId);
     
+    Optional<Attendance> findTopByEmployeeIdOrderByDateDesc(String employeeId);
+
+
+    
     
 
 }

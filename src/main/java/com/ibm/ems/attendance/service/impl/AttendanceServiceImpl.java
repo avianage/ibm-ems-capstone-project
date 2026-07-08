@@ -9,6 +9,7 @@ import com.ibm.ems.attendance.dto.CheckInRequest;
 import com.ibm.ems.attendance.dto.CheckOutRequest;
 import com.ibm.ems.attendance.dto.MonthlyReportResponse;
 import com.ibm.ems.attendance.entity.Attendance;
+import com.ibm.ems.attendance.exception.AttendanceNotFoundException;
 import com.ibm.ems.attendance.repository.AttendanceRepository;
 import com.ibm.ems.attendance.service.AttendanceService;
 
@@ -250,6 +251,20 @@ public class AttendanceServiceImpl implements AttendanceService {
 
         return response;
     }
-    
+    @Override
+    public AttendanceResponse getAttendanceByEmployeeId(String employeeId) {
+
+        Attendance attendance = attendanceRepository
+                .findTopByEmployeeIdOrderByDateDesc(employeeId)
+                .orElseThrow(() ->
+                        new AttendanceNotFoundException("Attendance not found"));
+
+        AttendanceResponse response = new AttendanceResponse();
+        response.setId(attendance.getId());
+        response.setEmployeeId(attendance.getEmployeeId());
+        response.setStatus(attendance.getStatus());
+
+        return response;
+    }
     
 }

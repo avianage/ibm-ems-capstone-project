@@ -29,6 +29,8 @@ public interface AttendanceService {
     
     MonthlyReportResponse getMonthlyReport(String employeeId, int month, int year);	
     
+    AttendanceResponse getAttendanceByEmployeeId(String employeeId);
+    
     
     void deleteAttendance(String id);
 }

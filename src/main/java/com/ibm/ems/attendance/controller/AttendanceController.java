@@ -92,4 +92,11 @@ public class AttendanceController {
         return attendanceService.getMonthlyReport(employeeId, month, year);
     }
     
+    @GetMapping("/employee/{employeeId}")
+    public AttendanceResponse getAttendanceByEmployeeId(
+            @PathVariable String employeeId) {
+
+        return attendanceService.getAttendanceByEmployeeId(employeeId);
+    }
+    
 }
