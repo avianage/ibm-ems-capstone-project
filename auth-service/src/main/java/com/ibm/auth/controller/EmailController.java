@@ -2,6 +2,7 @@ package com.ibm.auth.controller;
 
 
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -9,12 +10,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import com.ibm.auth.common.exception.PasswordRecoveryException;
-import com.ibm.auth.dto.PasswordDtos.ApiResponse;
-import com.ibm.auth.dto.PasswordDtos.ChangePasswordRequest;
-import com.ibm.auth.dto.PasswordDtos.ForgotPasswordRequest;
-import com.ibm.auth.dto.PasswordDtos.ResetPasswordRequest;
-import com.ibm.auth.dto.PasswordDtos.VerifyOtpRequest;
-import com.ibm.auth.dto.PasswordDtos.VerifyOtpResponse;
+import com.ibm.auth.payload.request.PasswordDtos.ApiResponse;
+import com.ibm.auth.payload.request.PasswordDtos.ChangePasswordRequest;
+import com.ibm.auth.payload.request.PasswordDtos.ForgotPasswordRequest;
+import com.ibm.auth.payload.request.PasswordDtos.ResetPasswordRequest;
+import com.ibm.auth.payload.request.PasswordDtos.VerifyOtpRequest;
+import com.ibm.auth.payload.request.PasswordDtos.VerifyOtpResponse;
 import com.ibm.auth.entity.User;
 import com.ibm.auth.repository.UserRepository;
 import com.ibm.auth.service.EmailService;
@@ -22,23 +23,13 @@ import com.ibm.auth.service.OtpService;
 
 @RestController
 @RequestMapping("/api/v1/auth")
-public class PasswordController {
+@RequiredArgsConstructor
+public class EmailController {
 
     private final OtpService otpService;
     private final EmailService emailService;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-
-    public PasswordController(OtpService otpService,
-                               EmailService emailService,
-                               UserRepository userRepository,
-                               PasswordEncoder passwordEncoder) {
-        this.otpService = otpService;
-        this.emailService = emailService;
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-    }
-
  
     @PostMapping("/forgot-password")
     public ResponseEntity<ApiResponse> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
@@ -107,10 +98,5 @@ public class PasswordController {
         emailService.sendPasswordChangedNotification(usernameOrEmail);
 
         return ResponseEntity.ok(new ApiResponse(true, "Password changed successfully"));
-    }
-
-    @ExceptionHandler(PasswordRecoveryException.class)
-    public ResponseEntity<ApiResponse> handlePasswordRecoveryException(PasswordRecoveryException ex) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse(false, ex.getMessage()));
     }
 }

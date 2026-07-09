@@ -4,6 +4,7 @@ import com.ibm.auth.common.exception.EmailAlreadyExistsException;
 import com.ibm.auth.common.exception.UsernameAlreadyExistsException;
 import com.ibm.auth.common.exception.InvalidCredentialsException;
 import com.ibm.auth.common.payload.ApiResponse;
+import com.ibm.auth.common.util.EmployeeIdGenerator;
 import com.ibm.auth.entity.User;
 import com.ibm.auth.payload.enums.Role;
 import com.ibm.auth.payload.request.LoginRequest;
@@ -32,6 +33,7 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
+    private final EmployeeIdGenerator employeeIdGenerator;
 
     @Override
     public ApiResponse<Void> signup(SignupRequest request) {
@@ -54,6 +56,7 @@ public class AuthServiceImpl implements AuthService {
         // Build user
         User user = User.builder()
                 .username(request.getUsername())
+                .employeeId(employeeIdGenerator.generateEmployeeId())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .roles(Set.of(Role.ROLE_EMPLOYEE))
