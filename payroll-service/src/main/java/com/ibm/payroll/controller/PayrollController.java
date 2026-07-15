@@ -17,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.util.List;
 
@@ -31,6 +32,7 @@ public class PayrollController {
 
     @PostMapping("/salary-structure")
     @Operation(summary = "Define or update salary structure for an employee")
+    @PreAuthorize("hasAnyRole('ADMIN', 'HR')")
     public ResponseEntity<ApiResponse<SalaryStructureResponse>> defineSalaryStructure(
             @Valid @RequestBody SalaryStructureRequest request) {
         return ResponseEntity.ok(salaryStructureService.defineOrUpdate(request));
@@ -38,6 +40,7 @@ public class PayrollController {
 
     @GetMapping("/salary-structure/{employeeId}")
     @Operation(summary = "Get the current salary structure for an employee")
+    @PreAuthorize("hasAnyRole('ADMIN', 'HR', 'EMPLOYEE')")
     public ResponseEntity<ApiResponse<SalaryStructureResponse>> getSalaryStructure(
             @PathVariable String employeeId) {
         return ResponseEntity.ok(salaryStructureService.getByEmployeeId(employeeId));
@@ -45,6 +48,7 @@ public class PayrollController {
 
     @PostMapping("/generate")
     @Operation(summary = "Generate payroll for a period across a set of employees")
+    @PreAuthorize("hasAnyRole('ADMIN', 'HR')")
     public ResponseEntity<ApiResponse<PayrollRunResponse>> generatePayroll(
             @Valid @RequestBody GeneratePayrollRequest request,
             HttpServletRequest httpRequest) {
@@ -54,6 +58,7 @@ public class PayrollController {
 
     @GetMapping("/payslip/{employeeId}/{period}")
     @Operation(summary = "Get the payslip for an employee for a given period")
+    @PreAuthorize("hasAnyRole('ADMIN', 'HR', 'EMPLOYEE')")
     public ResponseEntity<ApiResponse<PayslipResponse>> getPayslip(
             @PathVariable String employeeId,
             @PathVariable String period) {
@@ -62,6 +67,7 @@ public class PayrollController {
 
     @GetMapping("/history/{employeeId}")
     @Operation(summary = "Get the salary history for an employee")
+    @PreAuthorize("hasAnyRole('ADMIN', 'HR', 'EMPLOYEE')")
     public ResponseEntity<ApiResponse<List<SalaryHistoryResponse>>> getHistory(
             @PathVariable String employeeId) {
         return ResponseEntity.ok(payrollService.getHistory(employeeId));
@@ -69,6 +75,7 @@ public class PayrollController {
 
     @GetMapping("/payslip/{employeeId}/{period}/download")
     @Operation(summary = "Download the payslip receipt for an employee for a given period as PDF")
+    @PreAuthorize("hasAnyRole('ADMIN', 'HR', 'EMPLOYEE')")
     public ResponseEntity<byte[]> downloadPayslip(
             @PathVariable String employeeId,
             @PathVariable String period) {

@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.util.List;
 
@@ -19,17 +20,20 @@ public class TaskController {
     private final TaskService taskService;
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     public ResponseEntity<TaskResponse> createTask(@Valid @RequestBody TaskRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(taskService.createTask(request));
     }
 
     @GetMapping("/employee/{employeeId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'EMPLOYEE')")
     public ResponseEntity<List<TaskResponse>> getTasksByEmployeeId(@PathVariable String employeeId) {
         return ResponseEntity.ok(taskService.getTasksByEmployeeId(employeeId));
     }
 
     @PatchMapping("/{taskId}/status")
+    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
     public ResponseEntity<TaskResponse> updateTaskStatus(
             @PathVariable String taskId,
             @RequestParam String status) {

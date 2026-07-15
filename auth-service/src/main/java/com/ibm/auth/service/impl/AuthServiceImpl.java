@@ -89,8 +89,12 @@ public class AuthServiceImpl implements AuthService {
                     .map(Role::valueOf)
                     .collect(Collectors.toSet());
 
+            Set<String> roleStrings = roles.stream()
+                    .map(Role::name)
+                    .collect(Collectors.toSet());
+
             // Generate JWT
-            String token = jwtUtil.generateToken(request.getUsername());
+            String token = jwtUtil.generateToken(request.getUsername(), roleStrings);
 
             LoginResponse loginResponse = LoginResponse.builder()
                     .token(token)

@@ -70,6 +70,7 @@ public class EmployeeMapper {
                 .workLocation(employee.getWorkLocation())
                 .addresses(employee.getAddresses())
                 .createdAt(employee.getCreatedAt())
+                .authId(employee.getAuthId())
                 .build();
     }
 

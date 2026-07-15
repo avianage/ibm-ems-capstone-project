@@ -16,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.data.domain.Page;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 @RestController
 @RequestMapping("/api/v1/employees")
@@ -26,6 +27,7 @@ public class EmployeeController {
 
 //    Create Employee
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<EmployeeResponse>
     createEmployee(
             @Valid
@@ -38,6 +40,7 @@ public class EmployeeController {
 
 //    Gte Employee By Id
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'HR', 'MANAGER', 'EMPLOYEE')")
     public ResponseEntity<EmployeeResponse>
     getEmployeeById(@PathVariable String id) {
 
@@ -47,6 +50,7 @@ public class EmployeeController {
     
 //    Update Employee
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'HR', 'EMPLOYEE')")
     public ResponseEntity<EmployeeResponse>
     updateEmployee(
             @PathVariable String id,
@@ -60,6 +64,7 @@ public class EmployeeController {
     
 //    Soft Delete
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteEmployee(
             @PathVariable String id) {
 
@@ -70,6 +75,7 @@ public class EmployeeController {
     
 //    Get by Code
     @GetMapping("/code/{employeeCode}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'HR', 'MANAGER', 'EMPLOYEE')")
     public ResponseEntity<EmployeeResponse>
     getByCode(
             @PathVariable String employeeCode) {
@@ -82,6 +88,7 @@ public class EmployeeController {
     
 //    Get by Department
     @GetMapping("/department/{departmentId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'HR', 'MANAGER')")
     public ResponseEntity<List<EmployeeResponse>>
     getByDepartment(
             @PathVariable String departmentId) {
@@ -93,6 +100,7 @@ public class EmployeeController {
     
 //    Get by Designation
     @GetMapping("/designation/{designationId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'HR', 'MANAGER')")
     public ResponseEntity<List<EmployeeResponse>>
     getByDesignation(
             @PathVariable String designationId) {
@@ -104,6 +112,7 @@ public class EmployeeController {
     
 //    Get by Manager
     @GetMapping("/manager/{managerId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'HR', 'MANAGER')")
     public ResponseEntity<List<EmployeeResponse>>
     getByManager(
             @PathVariable String managerId) {
@@ -115,6 +124,7 @@ public class EmployeeController {
     
 //    Get by Status
     @GetMapping("/status/{status}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'HR')")
     public ResponseEntity<List<EmployeeResponse>>
     getByStatus(
             @PathVariable EmploymentStatus status) {
@@ -125,6 +135,7 @@ public class EmployeeController {
     
 //    Update Status
     @PatchMapping("/{id}/status")
+    @PreAuthorize("hasAnyRole('ADMIN', 'HR')")
     public ResponseEntity<EmployeeResponse>
     updateStatus(
             @PathVariable String id,
@@ -138,6 +149,7 @@ public class EmployeeController {
     
 //    Pagination API
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'HR')")
     public ResponseEntity<Page<EmployeeResponse>>
     getAllEmployees(
 
@@ -163,6 +175,7 @@ public class EmployeeController {
     
 //    Get All Employees
     @GetMapping("/all")
+    @PreAuthorize("hasAnyRole('ADMIN', 'HR')")
     public ResponseEntity<List<EmployeeResponse>> getAllEmployees() {
 
         return ResponseEntity.ok(

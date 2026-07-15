@@ -84,4 +84,6 @@ public class Employee {
 
     @LastModifiedBy
     private String updatedBy;
+
+    private String authId;
 }

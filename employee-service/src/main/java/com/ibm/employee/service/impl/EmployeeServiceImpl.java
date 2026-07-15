@@ -22,6 +22,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import com.ibm.employee.client.AuthClient;
+import org.springframework.http.HttpHeaders;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +34,20 @@ public class EmployeeServiceImpl
 
     private final EmployeeRepository employeeRepository;
     private final EmployeeMapper employeeMapper;
+    private final AuthClient authClient;
+
+    private String getAuthorizationHeader() {
+        try {
+            ServletRequestAttributes attributes =
+                    (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+            if (attributes != null) {
+                return attributes.getRequest().getHeader(HttpHeaders.AUTHORIZATION);
+            }
+        } catch (Exception e) {
+            // Log warning
+        }
+        return null;
+    }
 
 //    Create employee
     @Override
@@ -46,9 +64,19 @@ public class EmployeeServiceImpl
         Employee employee =
                 employeeMapper.toEntity(request);
 
-        employee = employeeRepository.save(employee);
+        final Employee savedEmployee = employeeRepository.save(employee);
 
-        return employeeMapper.toResponse(employee);
+        // Sync with auth-service to create user
+        String authHeader = getAuthorizationHeader();
+        if (authHeader != null) {
+            authClient.createUserFromEmployee(savedEmployee.getId(), savedEmployee.getEmail(), authHeader)
+                    .ifPresent(authId -> {
+                        savedEmployee.setAuthId(authId);
+                        employeeRepository.save(savedEmployee);
+                    });
+        }
+
+        return employeeMapper.toResponse(savedEmployee);
     }
 
 //    Get Employee By Id
