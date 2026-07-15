@@ -30,7 +30,7 @@ public class EmployeeClient {
             }
 
             var response = restTemplate.exchange(
-                    employeeServiceBaseUrl + "/api/employees/" + employeeId,
+                    employeeServiceBaseUrl + "/api/v1/employees/" + employeeId,
                     HttpMethod.GET,
                     new HttpEntity<>(headers),
                     EmployeeDto.class
