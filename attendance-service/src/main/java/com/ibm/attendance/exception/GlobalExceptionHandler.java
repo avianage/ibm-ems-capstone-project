@@ -30,6 +30,20 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(LeaveRequestNotFoundException.class)
+    public ResponseEntity<?> handleLeaveRequestNotFound(LeaveRequestNotFoundException ex,
+                                                        HttpServletRequest request) {
+
+        Map<String, Object> error = new HashMap<>();
+        error.put("timestamp", LocalDateTime.now());
+        error.put("status", HttpStatus.NOT_FOUND.value());
+        error.put("error", "NOT_FOUND");
+        error.put("message", ex.getMessage());
+        error.put("path", request.getRequestURI());
+
+        return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
+    }
+
     // 2. Handle validation errors (@Valid)
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<?> handleValidationErrors(MethodArgumentNotValidException ex,

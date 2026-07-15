@@ -15,4 +15,6 @@ public interface PayrollService {
     ApiResponse<PayslipResponse> getPayslip(String employeeId, String period);
 
     ApiResponse<List<SalaryHistoryResponse>> getHistory(String employeeId);
+
+    byte[] getPayslipPdf(String employeeId, String period);
 }

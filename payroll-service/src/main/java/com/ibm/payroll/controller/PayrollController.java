@@ -66,4 +66,18 @@ public class PayrollController {
             @PathVariable String employeeId) {
         return ResponseEntity.ok(payrollService.getHistory(employeeId));
     }
+
+    @GetMapping("/payslip/{employeeId}/{period}/download")
+    @Operation(summary = "Download the payslip receipt for an employee for a given period as PDF")
+    public ResponseEntity<byte[]> downloadPayslip(
+            @PathVariable String employeeId,
+            @PathVariable String period) {
+        byte[] pdfBytes = payrollService.getPayslipPdf(employeeId, period);
+        org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+        headers.setContentType(org.springframework.http.MediaType.APPLICATION_PDF);
+        headers.setContentDisposition(org.springframework.http.ContentDisposition.attachment()
+                .filename("payslip_" + employeeId + "_" + period + ".pdf")
+                .build());
+        return new ResponseEntity<>(pdfBytes, headers, org.springframework.http.HttpStatus.OK);
+    }
 }
