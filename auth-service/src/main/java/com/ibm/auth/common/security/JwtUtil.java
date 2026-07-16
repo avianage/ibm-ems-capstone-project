@@ -26,9 +26,15 @@ public class JwtUtil {
 
     // Generate JWT
     public String generateToken(String username) {
+        return generateToken(username, java.util.Collections.emptyList());
+    }
+
+    // Generate JWT with roles
+    public String generateToken(String username, java.util.Collection<String> roles) {
 
         return Jwts.builder()
                 .subject(username)
+                .claim("roles", roles)
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + jwtExpiration))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)

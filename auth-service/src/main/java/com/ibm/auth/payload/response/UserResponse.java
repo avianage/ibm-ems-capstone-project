@@ -22,4 +22,6 @@ public class UserResponse {
 
     private boolean deleted;
 
+    private String employeeId;
+
 }

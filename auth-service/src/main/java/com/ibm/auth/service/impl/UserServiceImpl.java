@@ -7,6 +7,7 @@ import com.ibm.auth.common.exception.UsernameAlreadyExistsException;
 import com.ibm.auth.common.payload.ApiResponse;
 import com.ibm.auth.entity.User;
 import com.ibm.auth.payload.enums.Role;
+import com.ibm.auth.payload.request.CreateUserFromEmployeeRequest;
 import com.ibm.auth.payload.request.UpdateUserRequest;
 import com.ibm.auth.payload.response.SearchResponse;
 import com.ibm.auth.payload.response.UserResponse;
@@ -21,11 +22,15 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
+import com.ibm.auth.common.util.EmployeeIdGenerator;
+
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
         private final UserRepository userRepository;
+        private final org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
+        private final EmployeeIdGenerator employeeIdGenerator;
 
         /**
          * Entity -> DTO
@@ -39,6 +44,7 @@ public class UserServiceImpl implements UserService {
                                 .roles(user.getRoles())
                                 .enabled(user.isEnabled())
                                 .deleted(user.isDeleted())
+                                .employeeId(user.getEmployeeId())
                                 .build();
         }
 
@@ -281,6 +287,45 @@ public class UserServiceImpl implements UserService {
                         .build();
 
                 return new ApiResponse<>(true, "User found", response);
+        }
+
+        @Override
+        public ApiResponse<UserResponse> createUserFromEmployee(CreateUserFromEmployeeRequest request) {
+                if (userRepository.existsByUsername(request.getUsername())) {
+                        throw new UsernameAlreadyExistsException("Username already exists");
+                }
+
+                if (userRepository.existsByEmail(request.getEmail())) {
+                        throw new EmailAlreadyExistsException("Email already exists");
+                }
+
+                String generatedEmployeeId = employeeIdGenerator.generateEmployeeId();
+
+                User user = User.builder()
+                        .employeeId(generatedEmployeeId)
+                        .username(request.getUsername())
+                        .email(request.getEmail())
+                        .password(passwordEncoder.encode("Password123"))
+                        .roles(Set.of(Role.ROLE_EMPLOYEE))
+                        .enabled(true)
+                        .accountLocked(false)
+                        .createdAt(LocalDateTime.now())
+                        .updatedAt(LocalDateTime.now())
+                        .build();
+
+                userRepository.save(user);
+
+                UserResponse response = UserResponse.builder()
+                        .id(user.getId())
+                        .username(user.getUsername())
+                        .email(user.getEmail())
+                        .roles(user.getRoles())
+                        .enabled(user.isEnabled())
+                        .deleted(user.isDeleted())
+                        .employeeId(user.getEmployeeId())
+                        .build();
+
+                return new ApiResponse<>(true, "User created from employee successfully", response);
         }
 
 }

@@ -15,6 +15,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.util.List;
 
@@ -28,6 +29,7 @@ public class PerformanceController {
 
     @PostMapping("/review")
     @Operation(summary = "Create a performance review for an employee")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     public ResponseEntity<ApiResponse<PerformanceReviewResponse>> createReview(
             @Valid @RequestBody PerformanceReviewRequest request) {
         return ResponseEntity.ok(performanceService.createReview(request));
@@ -35,6 +37,7 @@ public class PerformanceController {
 
     @GetMapping("/review/{employeeId}")
     @Operation(summary = "Get all performance reviews for an employee")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'EMPLOYEE')")
     public ResponseEntity<ApiResponse<List<PerformanceReviewResponse>>> getReviews(
             @PathVariable String employeeId) {
         return ResponseEntity.ok(performanceService.getReviews(employeeId));
@@ -42,6 +45,7 @@ public class PerformanceController {
 
     @PostMapping("/rating")
     @Operation(summary = "Record an employee rating")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     public ResponseEntity<ApiResponse<EmployeeRatingResponse>> createRating(
             @Valid @RequestBody EmployeeRatingRequest request) {
         return ResponseEntity.ok(performanceService.createRating(request));
@@ -49,6 +53,7 @@ public class PerformanceController {
 
     @PostMapping("/goals")
     @Operation(summary = "Set a goal for an employee")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     public ResponseEntity<ApiResponse<GoalResponse>> createGoal(
             @Valid @RequestBody GoalRequest request) {
         return ResponseEntity.ok(performanceService.createGoal(request));
@@ -56,6 +61,7 @@ public class PerformanceController {
 
     @GetMapping("/kpi/{employeeId}")
     @Operation(summary = "Get KPI tracking data for an employee")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'EMPLOYEE')")
     public ResponseEntity<ApiResponse<List<KpiResponse>>> getKpis(
             @PathVariable String employeeId) {
         return ResponseEntity.ok(performanceService.getKpis(employeeId));

@@ -1,6 +1,6 @@
-package com.ibm.employee.config;
+package com.ibm.attendance.config;
  
-import com.ibm.employee.security.JwtAuthenticationFilter;
+import com.ibm.attendance.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -50,11 +50,11 @@ public class SecurityConfig {
  
                         // Public endpoints
                         .requestMatchers(
-                                "/api/v1/auth/**",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
                                 "/v3/api-docs/**",
-                                "/actuator/health"
+                                "/actuator/health",
+                                "/attendance/test"
                         ).permitAll()
  
                         // Secure all other endpoints
@@ -75,7 +75,7 @@ public class SecurityConfig {
  
         CorsConfiguration configuration = new CorsConfiguration();
  
-        configuration.setAllowedOrigins(List.of("http://localhost:4200"));
+        configuration.setAllowedOrigins(List.of("http://localhost:5173", "http://localhost:4200"));
         configuration.setAllowedMethods(List.of(
                 "GET",
                 "POST",
@@ -95,4 +95,3 @@ public class SecurityConfig {
         return source;
     }
 }
- 

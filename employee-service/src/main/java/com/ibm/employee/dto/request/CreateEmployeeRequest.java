@@ -18,6 +18,9 @@ public class CreateEmployeeRequest {
     @NotBlank(message = "First name is mandatory")
     private String firstName;
 
+    @NotBlank(message = "Username is mandatory")
+    private String username;
+
     private String middleName;
 
     @NotBlank(message = "Last name is mandatory")

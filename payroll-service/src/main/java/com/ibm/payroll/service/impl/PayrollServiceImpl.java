@@ -141,4 +141,12 @@ public class PayrollServiceImpl implements PayrollService {
                 .generatedAt(payslip.getGeneratedAt())
                 .build();
     }
+
+    @Override
+    public byte[] getPayslipPdf(String employeeId, String period) {
+        Payslip payslip = payslipRepository.findByEmployeeIdAndPeriod(employeeId, period)
+                .orElseThrow(() -> new com.ibm.payroll.common.exception.PayslipNotFoundException(
+                        "Payslip not found for employee " + employeeId + " and period " + period));
+        return com.ibm.payroll.common.util.PdfGenerator.generatePayslipPdf(payslip);
+    }
 }

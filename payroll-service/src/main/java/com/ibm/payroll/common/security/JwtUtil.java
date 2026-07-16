@@ -28,6 +28,11 @@ public class JwtUtil {
         return extractClaim(token, Claims::getSubject);
     }
 
+    @SuppressWarnings("unchecked")
+    public java.util.List<String> extractRoles(String token) {
+        return extractClaim(token, claims -> claims.get("roles", java.util.List.class));
+    }
+
     public Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
     }

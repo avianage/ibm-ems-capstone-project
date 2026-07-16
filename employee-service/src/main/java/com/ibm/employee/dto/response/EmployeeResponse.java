@@ -56,4 +56,6 @@ public class EmployeeResponse {
     private List<Address> addresses;
 
     private Instant createdAt;
+
+    private String authId;
 }
