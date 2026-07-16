@@ -22,12 +22,15 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
+import com.ibm.auth.common.util.EmployeeIdGenerator;
+
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
         private final UserRepository userRepository;
         private final org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
+        private final EmployeeIdGenerator employeeIdGenerator;
 
         /**
          * Entity -> DTO
@@ -41,6 +44,7 @@ public class UserServiceImpl implements UserService {
                                 .roles(user.getRoles())
                                 .enabled(user.isEnabled())
                                 .deleted(user.isDeleted())
+                                .employeeId(user.getEmployeeId())
                                 .build();
         }
 
@@ -295,8 +299,10 @@ public class UserServiceImpl implements UserService {
                         throw new EmailAlreadyExistsException("Email already exists");
                 }
 
+                String generatedEmployeeId = employeeIdGenerator.generateEmployeeId();
+
                 User user = User.builder()
-                        .employeeId(request.getEmployeeId())
+                        .employeeId(generatedEmployeeId)
                         .username(request.getUsername())
                         .email(request.getEmail())
                         .password(passwordEncoder.encode("Password123"))
@@ -316,6 +322,7 @@ public class UserServiceImpl implements UserService {
                         .roles(user.getRoles())
                         .enabled(user.isEnabled())
                         .deleted(user.isDeleted())
+                        .employeeId(user.getEmployeeId())
                         .build();
 
                 return new ApiResponse<>(true, "User created from employee successfully", response);

@@ -61,20 +61,26 @@ public class EmployeeServiceImpl
                     "Email already exists");
         }
 
-        Employee employee =
-                employeeMapper.toEntity(request);
+        String authHeader = getAuthorizationHeader();
+        if (authHeader == null) {
+            throw new IllegalArgumentException("Authorization token is required to create employee");
+        }
+
+        java.util.Map<String, String> syncData = authClient.createUserFromEmployee(
+                request.getUsername(),
+                request.getEmail(),
+                authHeader
+        ).orElseThrow(() -> new RuntimeException("Failed to register user in auth-service"));
+
+        String generatedEmployeeId = syncData.get("employeeId");
+        String authId = syncData.get("id");
+
+        Employee employee = employeeMapper.toEntity(request);
+        employee.setId(generatedEmployeeId);
+        employee.setEmployeeCode(generatedEmployeeId);
+        employee.setAuthId(authId);
 
         final Employee savedEmployee = employeeRepository.save(employee);
-
-        // Sync with auth-service to create user
-        String authHeader = getAuthorizationHeader();
-        if (authHeader != null) {
-            authClient.createUserFromEmployee(savedEmployee.getId(), savedEmployee.getEmail(), authHeader)
-                    .ifPresent(authId -> {
-                        savedEmployee.setAuthId(authId);
-                        employeeRepository.save(savedEmployee);
-                    });
-        }
 
         return employeeMapper.toResponse(savedEmployee);
     }

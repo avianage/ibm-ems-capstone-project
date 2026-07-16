@@ -13,7 +13,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class CreateUserFromEmployeeRequest {
 
-    @NotBlank(message = "Employee ID is required")
     private String employeeId;
 
     @NotBlank(message = "Username is required")

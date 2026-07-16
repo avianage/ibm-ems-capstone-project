@@ -42,10 +42,22 @@ public class AttendanceServiceImpl implements AttendanceService {
             throw new IllegalArgumentException("Employee ID cannot be empty.");
         }
 
-        // Convert Request DTO to Entity
-        Attendance attendance = new Attendance();
-        attendance.setEmployeeId(request.getEmployeeId());
-        attendance.setStatus(request.getStatus());
+        LocalDate today = LocalDate.now();
+        Optional<Attendance> existingAttendance =
+                attendanceRepository.findByEmployeeIdAndDate(
+                        request.getEmployeeId(),
+                        today);
+
+        Attendance attendance;
+        if (existingAttendance.isPresent()) {
+            attendance = existingAttendance.get();
+            attendance.setStatus(request.getStatus());
+        } else {
+            attendance = new Attendance();
+            attendance.setEmployeeId(request.getEmployeeId());
+            attendance.setDate(today);
+            attendance.setStatus(request.getStatus());
+        }
 
         // Save into MongoDB
         Attendance savedAttendance = attendanceRepository.save(attendance);
